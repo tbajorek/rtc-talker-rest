@@ -1,0 +1,169 @@
+<?php
+
+namespace RtcTalker\Controller;
+
+use RtcTalker\Exception\InputDataException;
+use RtcTalker\Model\Address;
+use RtcTalker\Model\Availability;
+use RtcTalker\Model\Company;
+use RtcTalker\Model\OpenedTalk;
+use Slim\Http;
+use RtcTalker\Exception\NotFoundException;
+use RtcTalker\Exception\AuthException;
+
+class CompanyController extends AbstractController {
+    public function myCompany(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        try {
+            $user = $this->getUserFromToken($request);
+            $this->checkPermissions($request, $user, 'user.view.my.company');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not see the company for this user');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        $company = $user->getCompany();
+        if($company === null) {
+            return $response->withStatus(404, 'Company does not exist');
+        }
+        return $response->withJson($company, 200);
+    }
+
+    public function profile(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        $companyId = null;
+        try {
+            $user = $this->getUserFromToken($request);
+            $companyId = $args['companyId'];
+            if($user->getCompany()->getId()->toString() === $companyId) {
+                return $this->myCompany($request, $response, $args);
+            }
+            $this->checkPermissions($request, $user, 'admin.view.company');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not see the company for this user');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        $company = $this->em->getRepository(Company::class)->find($companyId);
+        if($company === null) {
+            return $response->withStatus(404, 'Company does not exist');
+        }
+        return $response->withJson($company, 200);
+    }
+
+    public function create(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        try {
+            $user = $this->getUserFromToken($request);
+            $this->checkPermissions($request, $user, 'company.create');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not add company for this user');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        $parsedBody = $request->getParsedBody();
+        if(!is_array($parsedBody) || !key_exists('name', $parsedBody) || !key_exists('nip', $parsedBody) ||!key_exists('address', $parsedBody)) {
+            return $response->withStatus(400, 'You did not provided all needed data');
+        }
+        $newCompany = new Company();
+        $newCompany->setName($parsedBody['name'])
+                   ->setNip($parsedBody['nip'])
+                   ->setWorkers([$user])
+                   ->setActivated(false);
+        $newAddress = Address::createFromRawData($parsedBody['address']);
+        $newCompany->setAddress($newAddress);
+        $user->setCompany($newCompany);
+        $this->em->merge($user);
+        $this->em->persist($newCompany);
+        $this->em->flush();
+        return $response->withJson($newCompany, 201);
+    }
+
+    public function update(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        try {
+            $user = $this->getUserFromToken($request);
+            $this->checkPermissions($request, $user, 'company.update');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not update company for this user');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        $company = $user->getCompany();
+        if($company === null) {
+            return $response->withStatus(404, 'You do not have a company');
+        }
+        $parsedBody = $request->getParsedBody();
+        if(!is_array($parsedBody)) {
+            return $response->withStatus(400, 'You did not provided all needed data');
+        }
+        if(key_exists('name', $parsedBody)) {
+            $company->setName($parsedBody['name']);
+        }
+        if(key_exists('nip', $parsedBody)) {
+            $company->setNip($parsedBody['nip']);
+        }
+        if(key_exists('address', $parsedBody)) {
+            $address = $company->getAddress();
+            $address->importFromRawData($parsedBody['address']);
+            $this->em->merge($address);
+        }
+        $this->em->merge($company);
+        $this->em->flush();
+        return $response->withJson($company, 200);
+    }
+
+    public function getAll(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        try {
+            $user = $this->getUserFromToken($request);
+            $this->checkPermissions($request, $user, 'admin.view.all.companies');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not view all companies');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        $companies = $this->em->getRepository(Company::class)->findAll();
+        if(count($companies) === 0) {
+            return $response->withStatus(404, 'Companies not found');
+        }
+        return $response->withJson(['companies'=>array_map(function (Company $company) : array {return $company->jsonSerializeMore();}, $companies)], 200);
+    }
+
+    public function activate(Http\Request $request, Http\Response $response, array $args): Http\Response {
+        try {
+            $user = $this->getUserFromToken($request);
+            $this->checkPermissions($request, $user, 'admin.activate.company');
+        } catch (NotFoundException $e) {
+            return $response->withStatus(404, 'You can not change availability for this company');
+        } catch (AuthException $e) {
+            return $response->withStatus(401, $e->getMessage());
+        }
+        try {
+            $activate = $this->getPayload($request, $response, function($activate) {
+                if(!is_int($activate)) {
+                    throw new InputDataException('Payload is wrong');
+                }
+            });
+        } catch (InputDataException $e) {
+            return $response->withStatus(400, $e->getMessage());
+        }
+        $companyId = $args['companyId'];
+        $company = $this->em->getRepository(Company::class)->find($companyId);
+        if($company === null) {
+            return $response->withStatus(404, 'Company does not exist');
+        }
+        $company->setActivated((bool)$activate);
+        $this->em->merge($company);
+        $this->em->flush();
+        return $response->withJson($company, 200);
+    }
+
+    public function getPayload(Http\Request $request, Http\Response $response, ?callable $checkFn = null) {
+        if($checkFn === null) {
+            $checkFn = function($input) : bool {return true;};
+        }
+        $parsedBody = $request->getParsedBody();
+        if(!is_array($parsedBody) || !key_exists('payload', $parsedBody)) {
+            throw new InputDataException('Your request does not have payload input data');
+        }
+        $payload = $parsedBody['payload'];
+        $checkFn($payload);
+        return $payload;
+    }
+}
