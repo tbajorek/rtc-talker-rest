@@ -16,6 +16,13 @@ session_start();
 // Instantiate the app
 
 $container = require_once '../bootstrap.php';
+
+// Load environment variables
+try {
+    $dotenv = new \Dotenv\Dotenv(dirname(__DIR__));
+    $dotenv->load();
+} catch (\Dotenv\Exception\InvalidPathException $e) {}
+
 $app = new \Slim\App($container);
 
 // Set up dependencies

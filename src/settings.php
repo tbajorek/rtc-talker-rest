@@ -1,7 +1,7 @@
 <?php
 return [
     'settings' => [
-        'displayErrorDetails' => true, // set to false in production
+        'displayErrorDetails' => getenv('DEV_MODE'), // set to false in production
         'addContentLengthHeader' => false, // Allow the web server to send the content-length header
 
         // Renderer settings
@@ -17,20 +17,20 @@ return [
         ],
         'doctrine' => [
             // if true, metadata caching is forcefully disabled
-            'dev_mode' => true,
+            'dev_mode' => getenv('DEV_MODE'),
             // path where the compiled metadata info will be cached
             // make sure the path exists and it is writable
             'cache_dir' => __DIR__ . '/../var/doctrine',
             // you should add any other path containing annotated entity classes
             'metadata_dirs' => [__DIR__ . '/Model'],
             'connection' => [
-                'driver' => 'pdo_mysql',
-                'host' => 'localhost',
-                'port' => 3306,
-                'dbname' => 'rtctalker',
-                'user' => 'rtctalker',
-                'password' => 'rtctalker',
-                'charset' => 'utf8'
+                'driver' => getenv('DB_DRIVER'),
+                'host' => getenv('BB_HOST'),
+                'port' => getenv('BB_PORT'),
+                'dbname' => getenv('DB_NAME'),
+                'user' => getenv('DB_USERNAME'),
+                'password' => getenv('DB_PASSWORD'),
+                'charset' => getenv('DB_CHARSET')
             ]
         ]
     ],
