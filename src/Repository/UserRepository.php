@@ -13,13 +13,13 @@ use RtcTalker\Model\User;
 class UserRepository extends EntityRepository{
     public function getNumberOfUsers() {
         $em = $this->getEntityManager();
-
-        $userQueryBuilder = $em->createQueryBuilder();
-        $userQueryBuilder->select('count(u.id)')
-            ->from(User::class, 'u')
-            ->getQuery()
-            ->getSingleScalarResult();
-
+        $query = $em->createQuery('SELECT COUNT(u) FROM \\RtcTalker\\Model\\User u');
+        $result = $query->getSingleScalarResult();
+        if($result !== null) {
+            return (int)$result;
+        } else {
+            return -1;
+        }
     }
     public function getOnlineForCompanyAndDepartment(Company $company, Department $department) {
         $em = $this->getEntityManager();
