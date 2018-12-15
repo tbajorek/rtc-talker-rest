@@ -37,8 +37,8 @@ return [
             'metadata_dirs' => [__DIR__ . '/Model'],
             'connection' => [
                 'driver' => getenv('DB_DRIVER'),
-                'host' => getenv('BB_HOST'),
-                'port' => getenv('BB_PORT'),
+                'host' => getenv('DB_HOST'),
+                'port' => getenv('DB_PORT'),
                 'dbname' => getenv('DB_NAME'),
                 'user' => getenv('DB_USERNAME'),
                 'password' => getenv('DB_PASSWORD'),
