@@ -8,8 +8,19 @@ use Doctrine\ORM\NonUniqueResultException;
 use RtcTalker\Model\Company;
 use RtcTalker\Model\Department;
 use RtcTalker\Model\Online;
+use RtcTalker\Model\User;
 
 class UserRepository extends EntityRepository{
+    public function getNumberOfUsers() {
+        $em = $this->getEntityManager();
+
+        $userQueryBuilder = $em->createQueryBuilder();
+        $userQueryBuilder->select('count(u.id)')
+            ->from(User::class, 'u')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+    }
     public function getOnlineForCompanyAndDepartment(Company $company, Department $department) {
         $em = $this->getEntityManager();
 
