@@ -37,7 +37,7 @@ class UserController extends AbstractController
             return $response->withStatus(400, 'Bad JSON format');
         }
         $user = User::createFromRawData($parsedBody);
-        $firstUser = $this->em->getRepository(User::class)->getNumberOfUsers() === 0);
+        $firstUser = ($this->em->getRepository(User::class)->getNumberOfUsers() === 0);
         if(is_string($parsedBody['company'])) {
             $company = $this->em->getRepository(Company::class)->find($parsedBody['company']);
             if($company === null) {
