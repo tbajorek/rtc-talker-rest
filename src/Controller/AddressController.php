@@ -13,7 +13,7 @@ class AddressController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.address.add');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie możesz dodać adresu dla tego użytkownika');
+            return $response->withStatus(404, 'Nie mozesz dodac adresu dla tego uzytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -26,7 +26,7 @@ class AddressController extends AbstractController {
             || !key_exists('country', $parsedBody)
             || !key_exists('phone', $parsedBody)
         ) {
-            return $response->withStatus(400, 'Nie podałeś wszystkich wymaganych danych');
+            return $response->withStatus(400, 'Nie podales wszystkich wymaganych danych');
         }
         $newAddress = Address::createFromRawData($parsedBody);
         $user->setAddress($newAddress);
@@ -41,7 +41,7 @@ class AddressController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.address.update');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie możesz zaktualizować adresu dla tego użytkownika');
+            return $response->withStatus(404, 'Nie mozesz zaktualizowac adresu dla tego uzytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -54,11 +54,11 @@ class AddressController extends AbstractController {
             || !key_exists('country', $parsedBody)
             || !key_exists('phone', $parsedBody)
         ) {
-            return $response->withStatus(400, 'Nie podałeś wszystkich wymaganych danych');
+            return $response->withStatus(400, 'Nie podales wszystkich wymaganych danych');
         }
         $address = $user->getAddress();
         if($address === null) {
-            return $response->withStatus(404, 'Nie masz żadnego adresu');
+            return $response->withStatus(404, 'Nie masz zadnego adresu');
         }
         $address->importFromRawData($parsedBody);
         $this->em->merge($address);

@@ -13,7 +13,7 @@ class ProfileController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.view.my.profile');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie można znaleźć użytkownika z podanym tokenem');
+            return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -25,7 +25,7 @@ class ProfileController extends AbstractController {
             $user = $this->getUserFromArgs($args);
             $this->checkPermissions($request, $user, 'user.view.profile');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie można znaleźć użytkownika z podanym tokenem');
+            return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -37,7 +37,7 @@ class ProfileController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.update.my.profile');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie można znaleźć użytkownika z podanym tokenem');
+            return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }

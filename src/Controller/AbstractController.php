@@ -27,13 +27,13 @@ abstract class AbstractController {
         $fullToken = $this->getFullToken($request);
         $token = $request->getAttribute("token");
         if($fullToken === null || $token === null) {
-            throw new AuthException('Twój token nie może być przeczytany');
+            throw new AuthException('Twoj token nie moze byc przeczytany');
         }
         if($user->getId()->toString() !== $token['sub']) {
-            throw new AuthException('Ten token nie należy do Ciebie');
+            throw new AuthException('Ten token nie nalezy do Ciebie');
         }
         if(!in_array($permission, Permissions::getForRole($user->getRole()))) {
-            throw new AuthException('Nie masz uprawnień do wykonania tej akcji');
+            throw new AuthException('Nie masz uprawnien do wykonania tej akcji');
         }
         return true;
     }
@@ -49,7 +49,7 @@ abstract class AbstractController {
             } catch (AuthException $e) {}
         }
         if(!$result) {
-            throw new AuthException('Nie masz uprawnień do wykonania tej akcji');
+            throw new AuthException('Nie masz uprawnien do wykonania tej akcji');
         }
     }
 

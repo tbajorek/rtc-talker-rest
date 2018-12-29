@@ -23,7 +23,7 @@ class RateController extends AbstractController
         $userId = $args['userId'];
         $user = $this->em->getRepository(User::class)->find($userId);
         if($user === null) {
-            return $response->withStatus(404, 'Użytkownik nie istnieje');
+            return $response->withStatus(404, 'Uzytkownik nie istnieje');
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)
@@ -31,7 +31,7 @@ class RateController extends AbstractController
             || !key_exists('comment', $parsedBody)
             || !key_exists('talk_id', $parsedBody)
         ) {
-            return $response->withStatus(400, 'Nie podałeś wszystkich wymaganych danych');
+            return $response->withStatus(400, 'Nie podales wszystkich wymaganych danych');
         }
         $talk = $this->em->getRepository(OpenedTalk::class)->findOneBy(['id' => $parsedBody['talk_id'], 'user' => $user]);
         if($talk === null) {
