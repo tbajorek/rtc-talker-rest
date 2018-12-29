@@ -22,7 +22,7 @@ class OptionsController extends AbstractController
         $companyId = $args['companyId'];
         $company = $this->em->getRepository(Company::class)->find($companyId);
         if($company === null) {
-            return $response->withStatus(404, 'Company does not exist');
+            return $response->withStatus(404, 'Firma nie istnieje');
         }
         $onlineDepartments = $this->em->getRepository(Department::class)->getOnlineForCompany($company);
 
@@ -65,7 +65,7 @@ class OptionsController extends AbstractController
             $this->em->flush();
             return $response->withJson(['user' => $chosenUser->jsonPublicSerialize(), 'talkId' => $openedTalk->getId()->toString()], 200);
         } else {
-            return $response->withStatus(404, 'Any user is not found for you');
+            return $response->withStatus(404, 'Żaden użytkownik nie został dla Ciebie znaleziony');
         }
     }
 
@@ -74,11 +74,11 @@ class OptionsController extends AbstractController
         $departmentId = $args['departmentId'];
         $company = $this->em->getRepository(Company::class)->find($companyId);
         if($company === null) {
-            throw new NotFoundException('Company does not exist');
+            throw new NotFoundException('Firma nie istnieje');
         }
         $department = $this->em->getRepository(Department::class)->find($departmentId);
         if($department === null) {
-            throw new NotFoundException('Department does not exist');
+            throw new NotFoundException('Departament nie istnieje');
         }
         return [$company, $department];
     }

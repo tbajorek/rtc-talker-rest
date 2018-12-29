@@ -34,14 +34,14 @@ class UserController extends AbstractController
     public function register(Http\Request $request, Http\Response $response): Http\Response {
         $parsedBody = $request->getParsedBody();
         if($parsedBody === null) {
-            return $response->withStatus(400, 'Bad JSON format');
+            return $response->withStatus(400, 'Zły format JSON');
         }
         $user = User::createFromRawData($parsedBody);
         $firstUser = ($this->em->getRepository(User::class)->getNumberOfUsers() === 0);
         if(is_string($parsedBody['company'])) {
             $company = $this->em->getRepository(Company::class)->find($parsedBody['company']);
             if($company === null) {
-                return $response->withStatus(404, 'Company with passed id does not exists');
+                return $response->withStatus(404, 'Firma o podanym identyfikatorze nie istnieje');
             }
             $user->setCompany($company);
             $user->setRole(USER::$USER);
@@ -57,9 +57,9 @@ class UserController extends AbstractController
             $this->em->persist($user);
             $this->em->flush();
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-            return $response->withStatus(409, 'User with the parameters already exists');
+            return $response->withStatus(409, 'Użytkownik o podanych parametrach już istnieje');
         }
-        return $response->withStatus(201, 'New user has been registered');
+        return $response->withStatus(201, 'Nowy użytkownik został zarejestrowany');
     }
 
     /**
@@ -72,15 +72,15 @@ class UserController extends AbstractController
     public function login(Http\Request $request, Http\Response $response): Http\Response {
         $parsedBody = $request->getParsedBody();
         if($parsedBody === null) {
-            return $response->withStatus(400, 'Bad JSON format');
+            return $response->withStatus(400, 'Zły format JSON');
         }
 
         $user = $this->em->getRepository(User::class)->findOneBy(["email"=>$parsedBody['email']]);
         if($user === null || !$user->hasSamePassword($parsedBody['password'])) {
-            return $response->withStatus(403, 'You can not be authenticated in this system');
+            return $response->withStatus(403, 'Nie możesz zostać zalogowany w systemie');
         }
         if(!$user->isActivated()) {
-            return $response->withStatus(403, 'Your account is not activated');
+            return $response->withStatus(403, 'Twoje konto nie jest aktywowane');
         }
         /**
          * @var Session
@@ -115,7 +115,7 @@ class UserController extends AbstractController
             $user = $this->getUserFromArgs($args);
             $this->checkPermissions($request, $user, 'user.logout');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not remove session for this user');
+            return $response->withStatus(404, 'Nie znaleziono zalogowanego użytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -126,11 +126,11 @@ class UserController extends AbstractController
             "token" => $fullToken
         ]);
         if($session === null) {
-            return $response->withStatus(404, 'You can not find the session');
+            return $response->withStatus(404, 'Nie można znaleźć sesji');
         }
         $this->em->remove($session);
         $this->em->flush();
-        return $response->withStatus(204, 'You have been logged out');
+        return $response->withStatus(204, 'Zostałeś pozytywnie wylogowany');
     }
 
     public function availability(Http\Request $request, Http\Response $response, array $args): Http\Response {
@@ -138,14 +138,14 @@ class UserController extends AbstractController
             $user = $this->getUserFromArgs($args);
             $this->checkPermissions($request, $user, 'user.change.availability');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not change availability for this user');
+            return $response->withStatus(404, 'Nie znaleziono zalogowanego użytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         try {
             $rawAvailabilities = $this->getPayload($request, $response, function($availabilities) {
                 if(!is_array($availabilities)) {
-                    throw new InputDataException('Payload should be an array');
+                    throw new InputDataException('Przesłane dane powinny być tablicą');
                 }
             });
         } catch (InputDataException $e) {
@@ -178,14 +178,14 @@ class UserController extends AbstractController
             $user = $this->getUserFromArgs($args);
             $this->checkPermissions($request, $user, 'manager.change.departments');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not change company for this user');
+            return $response->withStatus(404, 'Nie znaleziono zalogowanego użytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         try {
             $rawDepartments = $this->getPayload($request, $response, function(array $departments) {
                 if(!is_array($departments)) {
-                    throw new InputDataException('Payload should be an array');
+                    throw new InputDataException('Przesłane dane powinny być tablicą');
                 }
             });
         } catch (InputDataException $e) {
@@ -212,14 +212,14 @@ class UserController extends AbstractController
             $actionUser = $this->getUserFromToken($request);
             $this->checkAllPermissions($request, $actionUser, ['manager.activate.user', 'admin.activate.user']);
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not change availability for this user');
+            return $response->withStatus(404, 'Nie znaleziono zalogowanego użytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         try {
             $activate = $this->getPayload($request, $response, function($activate) {
                 if(!is_int($activate)) {
-                    throw new InputDataException('Payload is wrong');
+                    throw new InputDataException('Przesłane dane są nieprawidłowe');
                 }
             });
         } catch (InputDataException $e) {
@@ -236,7 +236,7 @@ class UserController extends AbstractController
         try {
             $user = $this->getUserFromToken($request);
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not change availability for this user');
+            return $response->withStatus(404, 'Nie znaleziono zalogowanego użytkownika');
         }
         $companyId = $args['companyId'] ?? null;
         if($companyId) {
@@ -246,7 +246,7 @@ class UserController extends AbstractController
             } catch (AuthException $e) {
                 return $response->withStatus(401, $e->getMessage());
             } catch (\Doctrine\DBAL\Types\ConversionException $e) {
-                return $response->withStatus(400, 'Wrong type of company id');
+                return $response->withStatus(400, 'Nieprawidłowy typ identyfikatora firmy');
             }
         } else {
             try {
@@ -264,7 +264,7 @@ class UserController extends AbstractController
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'manager.invite.user');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not invite new user');
+            return $response->withStatus(404, 'Nie możesz zaprosić nowego użytkownika');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
@@ -274,12 +274,12 @@ class UserController extends AbstractController
             || !key_exists('name', $parsedBody)
             || !key_exists('surname', $parsedBody)
         ) {
-            return $response->withStatus(400, 'You did not provided all needed data');
+            return $response->withStatus(400, 'Nie dostarczyłeś wszystkich wymaganych danych');
         }
 
         $foundUser = $this->em->getRepository(User::class)->findOneBy(['email'=>$parsedBody['email']]);
         if($foundUser!== null) {
-            return $response->withStatus(400, 'You can not invite existing user');
+            return $response->withStatus(400, 'Nie możesz zaprosić już istniejącego użytkownika');
         }
         $company = $user->getCompany();
         $mail = new Message();
@@ -297,18 +297,18 @@ class UserController extends AbstractController
             $mailer = new SendmailMailer();
             $mailer->send($mail);
         } catch (\Exception $e) {
-            return $response->withStatus(418, 'Sending emails mechanism does not work');
+            return $response->withStatus(418, 'Mechanizm wysyłania maili nie działa prawidłowo');
         }
-        return $response->withStatus(200, 'Invitation has been sent');
+        return $response->withStatus(200, 'Zaproszenie zostało wysłane');
     }
 
-    public function getPayload(Http\Request $request, Http\Response $response, ?callable $checkFn = null) {
+    private function getPayload(Http\Request $request, Http\Response $response, ?callable $checkFn = null) {
         if($checkFn === null) {
             $checkFn = function($input) : bool {return true;};
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody) || !key_exists('payload', $parsedBody)) {
-            throw new InputDataException('Your request does not have payload input data');
+            throw new InputDataException('Przesłane dane są niekompletne');
         }
         $payload = $parsedBody['payload'];
         $checkFn($payload);

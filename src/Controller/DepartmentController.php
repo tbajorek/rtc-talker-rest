@@ -18,7 +18,7 @@ class DepartmentController extends AbstractController
         }
         $departments = $company->getDepartments();
         if(count($departments->getKeys()) < 1) {
-            return $response->withStatus(404, 'Any department does not exist for your company');
+            return $response->withStatus(404, 'Żaden departament nie istnieje dla Twojej firmy');
         }
         return $response->withJson(['companyId' => $company->getId()->toString(), 'departments' => $departments->getValues()], 200);
     }
@@ -30,7 +30,7 @@ class DepartmentController extends AbstractController
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody) || !key_exists('name', $parsedBody)) {
-            return $response->withStatus(400, 'You did not provided all needed data');
+            return $response->withStatus(400, 'Nie podałeś wszystkich potrzebnych danych');
         }
         $newDepartment = new Department();
         $newDepartment->setName($parsedBody['name'])
@@ -64,11 +64,11 @@ class DepartmentController extends AbstractController
         $departmentId = $args['departmentId'];
         $department = $this->em->getRepository(Department::class)->find($departmentId);
         if($department === null) {
-            return $response->withStatus(404, 'Department does not exist');
+            return $response->withStatus(404, 'Departament nie istnieje');
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)) {
-            return $response->withStatus(400, 'You did not provided all needed data');
+            return $response->withStatus(400, 'Nie podałeś wszystkich potrzebnych danych');
         }
         if(key_exists('name', $parsedBody)) {
             $department->setName($parsedBody['name']);
@@ -99,22 +99,22 @@ class DepartmentController extends AbstractController
         $departmentId = $args['departmentId'];
         $department = $this->em->getRepository(Department::class)->find($departmentId);
         if($department === null) {
-            return $response->withStatus(404, 'Department does not exist');
+            return $response->withStatus(404, 'Departament nie istnieje');
         }
         $this->em->remove($department);
         $this->em->flush();
-        return $response->withStatus(204, 'Departament has been removed');
+        return $response->withStatus(204, 'Departament został usunięty');
     }
 
     private function getCompany(Http\Request $request, Http\Response $response, array $args, $lowPermissions, $highPermissions) {
         try {
             $user = $this->getUserFromToken($request);
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not perform this action');
+            return $response->withStatus(404, 'Nie możesz wykonać tej akcji');
         }
         $userCompany = $user->getCompany();
         if($userCompany === null) {
-            return $response->withStatus(404, 'User company does not exist');
+            return $response->withStatus(404, 'Firma użytkownika nie istnieje');
         }
         $requestedCompanyId = $args['companyId'];
         try {
@@ -128,7 +128,7 @@ class DepartmentController extends AbstractController
         }
         $company = $this->em->getRepository(Company::class)->find($requestedCompanyId);
         if($company === null) {
-            return $response->withStatus(404, 'Company does not exist');
+            return $response->withStatus(404, 'Firma nie istnieje');
         }
         return $company;
     }

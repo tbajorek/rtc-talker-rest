@@ -17,13 +17,13 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.view.my.company');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not see the company for this user');
+            return $response->withStatus(404, 'Nie możesz widzieć danych tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         $company = $user->getCompany();
         if($company === null) {
-            return $response->withStatus(404, 'Company does not exist');
+            return $response->withStatus(404, 'Firma nie istnieje');
         }
         return $response->withJson($company, 200);
     }
@@ -38,13 +38,13 @@ class CompanyController extends AbstractController {
             }
             $this->checkPermissions($request, $user, 'admin.view.company');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not see the company for this user');
+            return $response->withStatus(404, 'Nie możesz widzieć danych tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         $company = $this->em->getRepository(Company::class)->find($companyId);
         if($company === null) {
-            return $response->withStatus(404, 'Company does not exist');
+            return $response->withStatus(404, 'Firma nie istnieje');
         }
         return $response->withJson($company, 200);
     }
@@ -54,13 +54,13 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.create');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not add company for this user');
+            return $response->withStatus(404, 'Nie masz uprawnień do dodania firmy');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody) || !key_exists('name', $parsedBody) || !key_exists('nip', $parsedBody) ||!key_exists('address', $parsedBody)) {
-            return $response->withStatus(400, 'You did not provided all needed data');
+            return $response->withStatus(400, 'Nie podałeś wszystkich wymaganych danych');
         }
         $newCompany = new Company();
         $newCompany->setName($parsedBody['name'])
@@ -81,17 +81,17 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.update');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not update company for this user');
+            return $response->withStatus(404, 'Nie możesz zmieniać danych tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         $company = $user->getCompany();
         if($company === null) {
-            return $response->withStatus(404, 'You do not have a company');
+            return $response->withStatus(404, 'Nie posiadasz swojej firmy');
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)) {
-            return $response->withStatus(400, 'You did not provided all needed data');
+            return $response->withStatus(400, 'Nie podałeś wszystkich wymaganych danych');
         }
         if(key_exists('name', $parsedBody)) {
             $company->setName($parsedBody['name']);
@@ -114,13 +114,13 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'admin.view.all.companies');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not view all companies');
+            return $response->withStatus(404, 'Nie możesz widzieć wszystkich firm');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         $companies = $this->em->getRepository(Company::class)->findAll();
         if(count($companies) === 0) {
-            return $response->withStatus(404, 'Companies not found');
+            return $response->withStatus(404, 'Firma nie została znaleziona');
         }
         return $response->withJson(['companies'=>array_map(function (Company $company) : array {return $company->jsonSerializeMore();}, $companies)], 200);
     }
@@ -130,14 +130,14 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'admin.activate.company');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'You can not change availability for this company');
+            return $response->withStatus(404, 'Nie możesz zmienić dostępności dla tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
         try {
             $activate = $this->getPayload($request, $response, function($activate) {
                 if(!is_int($activate)) {
-                    throw new InputDataException('Payload is wrong');
+                    throw new InputDataException('Dane są niepoprawne');
                 }
             });
         } catch (InputDataException $e) {
@@ -146,7 +146,7 @@ class CompanyController extends AbstractController {
         $companyId = $args['companyId'];
         $company = $this->em->getRepository(Company::class)->find($companyId);
         if($company === null) {
-            return $response->withStatus(404, 'Company does not exist');
+            return $response->withStatus(404, 'Firma nie istnieje');
         }
         $company->setActivated((bool)$activate);
         $this->em->merge($company);
@@ -160,7 +160,7 @@ class CompanyController extends AbstractController {
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody) || !key_exists('payload', $parsedBody)) {
-            throw new InputDataException('Your request does not have payload input data');
+            throw new InputDataException('Twoje zapytanie nie zawiera potrzebnych danych');
         }
         $payload = $parsedBody['payload'];
         $checkFn($payload);
