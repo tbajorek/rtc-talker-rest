@@ -167,7 +167,6 @@ class UserController extends AbstractController
     }
 
     /**
-     * @TODO !!!
      * @param Http\Request $request
      * @param Http\Response $response
      * @param array $args
@@ -176,7 +175,12 @@ class UserController extends AbstractController
     public function departments(Http\Request $request, Http\Response $response, array $args): Http\Response {
         try {
             $user = $this->getUserFromArgs($args);
-            $this->checkPermissions($request, $user, 'manager.change.departments');
+            $tokenUser = $this->getUserFromToken($request);
+            if($user->getId() === $tokenUser->getId()) {
+                $this->checkPermissions($request, $tokenUser, 'manager.change.departments');
+            } else {
+                $this->checkPermissions($request, $tokenUser, 'admin.change.departments');
+            }
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
         } catch (AuthException $e) {
