@@ -176,7 +176,7 @@ class UserController extends AbstractController
         try {
             $user = $this->getUserFromArgs($args);
             $tokenUser = $this->getUserFromToken($request);
-            if($user->getId() === $tokenUser->getId()) {
+            if($user->getCompany()->getId() === $tokenUser->getCompany()->getId()) {
                 $this->checkPermissions($request, $tokenUser, 'manager.change.departments');
             } else {
                 $this->checkPermissions($request, $tokenUser, 'admin.change.departments');
