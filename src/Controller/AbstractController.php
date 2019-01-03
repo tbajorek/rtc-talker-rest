@@ -88,6 +88,12 @@ abstract class AbstractController {
         if($session === null) {
             throw new NotFoundException($fullToken);
         }
+        $now = (new \DateTime())->getTimestamp();
+        if($session->getValidUntil()->getTimestamp() > $now) {
+            $this->em->remove($session);
+            $this->em->flush();
+            throw new AuthException('Twoj token wygasl');
+        }
         return $session->getUser();
     }
 }

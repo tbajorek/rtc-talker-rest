@@ -85,16 +85,27 @@ class UserController extends AbstractController
         /**
          * @var Session
          */
-        $sessionExisted = $this->em->getRepository(Session::class)->findOneBy([
-            "user"=>$user,
-            "ip"=>$request->getAttribute('ip_address')
+        $sessionsExisted = $this->em->getRepository(Session::class)->findBy([
+            "user"=>$user
         ]);
-        if($sessionExisted !== null) {
+        if(count($sessionsExisted) > 0) {
             $now = (new \DateTime())->getTimestamp();
-            if($sessionExisted->getValidUntil()->getTimestamp() > $now) {
-                return $response->withJson($sessionExisted, 200);
+            $ip = $request->getAttribute('ip_address');
+            $activeSession = null;
+            foreach ($sessionsExisted as $sessionExisted) {
+                if($sessionExisted->getValidUntil()->getTimestamp() > $now && $sessionExisted->getIp() === $ip && $activeSession === null) {
+                    $activeSession = $sessionExisted;
+                } else if($activeSession !== null && $sessionExisted->getValidUntil()->getTimestamp() < $sessionExisted->getValidUntil()->getTimestamp()) {
+                    $this->em->remove($activeSession);
+                    $activeSession = $sessionExisted;
+                } else {
+                    $this->em->remove($sessionExisted);
+                }
             }
-            $this->em->remove($sessionExisted);
+            if($activeSession !== null) {
+                $this->em->flush();
+                return $response->withJson($activeSession, 200);
+            }
         }
         $session = Session::createForUser($request, $user, Permissions::getForRole($user->getRole()));
         $this->em->persist($session);
@@ -119,16 +130,17 @@ class UserController extends AbstractController
         } catch (AuthException $e) {
             return $response->withStatus(401, $e->getMessage());
         }
-        $fullToken = $this->getFullToken($request);
-        $session = $this->em->getRepository(Session::class)->findOneBy([
-            "user" => $user,
-            "ip" => $request->getAttribute('ip_address'),
-            "token" => $fullToken
+        $sessionsExisted = $this->em->getRepository(Session::class)->findBy([
+            "user" => $user
         ]);
-        if($session === null) {
+        if(count($sessionsExisted) > 0) {
+            $activeSession = null;
+            foreach ($sessionsExisted as $sessionExisted) {
+                $this->em->remove($sessionExisted);
+            }
+        } else {
             return $response->withStatus(404, 'Nie mozna znalezc sesji');
         }
-        $this->em->remove($session);
         $this->em->flush();
         return $response->withStatus(204, 'Zostales pozytywnie wylogowany');
     }
@@ -154,7 +166,7 @@ class UserController extends AbstractController
         $availabilities = array_map(function (string $type) use ($user) :Availability {
             $availability = new Availability();
             $availability->setType($type)
-                         ->setUser($user);
+                ->setUser($user);
             return $availability;
         }, $rawAvailabilities);
         foreach ($user->getAvailability() as $oldAvailability) {
