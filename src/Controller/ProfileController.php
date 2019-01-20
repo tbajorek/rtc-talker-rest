@@ -15,7 +15,7 @@ class ProfileController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         return $response->withJson($user, 200);
     }
@@ -27,7 +27,7 @@ class ProfileController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         return $response->withJson($user, 200);
     }
@@ -39,7 +39,7 @@ class ProfileController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozna znalezc uzytkownika z podanym tokenem');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         $this->updateUserValue($user, $parsedBody, 'email');

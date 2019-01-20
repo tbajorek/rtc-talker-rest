@@ -15,7 +15,7 @@ class AddressController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozesz dodac adresu dla tego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)
@@ -43,7 +43,7 @@ class AddressController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozesz zaktualizowac adresu dla tego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)

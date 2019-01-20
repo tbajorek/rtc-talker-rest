@@ -17,9 +17,9 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.view.my.company');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz widziec danych tej firmy');
+            return $response->withStatus(403, 'Nie mozesz widziec danych tej firmy');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $company = $user->getCompany();
         if($company === null) {
@@ -40,7 +40,7 @@ class CompanyController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozesz widziec danych tej firmy');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $company = $this->em->getRepository(Company::class)->find($companyId);
         if($company === null) {
@@ -54,9 +54,9 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.create');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie masz uprawnień do dodania firmy');
+            return $response->withStatus(403, 'Nie masz uprawnień do dodania firmy');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody) || !key_exists('name', $parsedBody) || !key_exists('nip', $parsedBody) ||!key_exists('address', $parsedBody)) {
@@ -81,9 +81,9 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.update');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz zmieniac danych tej firmy');
+            return $response->withStatus(403, 'Nie mozesz zmieniac danych tej firmy');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $company = $user->getCompany();
         if($company === null) {
@@ -114,9 +114,9 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'admin.view.all.companies');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz widziec wszystkich firm');
+            return $response->withStatus(403, 'Nie mozesz widziec wszystkich firm');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $companies = $this->em->getRepository(Company::class)->findAll();
         if(count($companies) === 0) {
@@ -132,7 +132,7 @@ class CompanyController extends AbstractController {
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozesz zmienic dostepnosci dla tej firmy');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         try {
             $activate = $this->getPayload($request, $response, function($activate) {

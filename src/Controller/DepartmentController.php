@@ -124,7 +124,7 @@ class DepartmentController extends AbstractController
                 $this->checkPermissions($request, $user, $highPermissions);
             }
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $company = $this->em->getRepository(Company::class)->find($requestedCompanyId);
         if($company === null) {
