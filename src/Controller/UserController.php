@@ -256,13 +256,16 @@ class UserController extends AbstractController
         try {
             $user = $this->getUserFromToken($request);
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
+            return $response->withStatus(403, 'Nie znaleziono zalogowanego uzytkownika');
         }
         $companyId = $args['companyId'] ?? null;
         if($companyId) {
             try {
                 $this->checkPermissions($request, $user, 'manager.list.users');
                 $users = $this->em->getRepository(User::class)->findBy(['company'=>$companyId]);
+                if(empty($users)) {
+                    return $response->withStatus(404, 'Nie znaleziono użytkowników dla podanej firmy');
+                }
             } catch (AuthException $e) {
                 return $response->withStatus(403, $e->getMessage());
             } catch (\Doctrine\DBAL\Types\ConversionException $e) {
