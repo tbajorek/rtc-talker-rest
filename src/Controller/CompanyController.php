@@ -17,7 +17,7 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'user.view.my.company');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz widziec danych tej firmy');
+            return $response->withStatus(403, 'Nie mozesz widziec danych tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(403, $e->getMessage());
         }
@@ -54,7 +54,7 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.create');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie masz uprawnień do dodania firmy');
+            return $response->withStatus(403, 'Nie masz uprawnień do dodania firmy');
         } catch (AuthException $e) {
             return $response->withStatus(403, $e->getMessage());
         }
@@ -81,7 +81,7 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'company.update');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz zmieniac danych tej firmy');
+            return $response->withStatus(403, 'Nie mozesz zmieniac danych tej firmy');
         } catch (AuthException $e) {
             return $response->withStatus(403, $e->getMessage());
         }
@@ -114,7 +114,7 @@ class CompanyController extends AbstractController {
             $user = $this->getUserFromToken($request);
             $this->checkPermissions($request, $user, 'admin.view.all.companies');
         } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz widziec wszystkich firm');
+            return $response->withStatus(403, 'Nie mozesz widziec wszystkich firm');
         } catch (AuthException $e) {
             return $response->withStatus(403, $e->getMessage());
         }
