@@ -81,7 +81,7 @@ class UserController extends AbstractController
 
         $user = $this->em->getRepository(User::class)->findOneBy(["email"=>$parsedBody['email']]);
         if($user === null || !$user->hasSamePassword($parsedBody['password'])) {
-            return $response->withStatus(403, 'Nie mozesz zostac zalogowany w systemie');
+            return $response->withStatus(401, 'Nie mozesz zostac zalogowany w systemie');
         }
         if(!$user->isActivated()) {
             return $response->withStatus(403, 'Twoje konto nie jest aktywowane');
@@ -132,7 +132,7 @@ class UserController extends AbstractController
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $sessionsExisted = $this->em->getRepository(Session::class)->findBy([
             "user" => $user
@@ -156,7 +156,7 @@ class UserController extends AbstractController
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         try {
             $rawAvailabilities = $this->getPayload($request, $response, function($availabilities) {
@@ -200,7 +200,7 @@ class UserController extends AbstractController
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         try {
             $rawDepartments = $this->getPayload($request, $response, function(array $departments) {
@@ -234,7 +234,7 @@ class UserController extends AbstractController
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie znaleziono zalogowanego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         try {
             $activate = $this->getPayload($request, $response, function($activate) {
@@ -264,7 +264,7 @@ class UserController extends AbstractController
                 $this->checkPermissions($request, $user, 'manager.list.users');
                 $users = $this->em->getRepository(User::class)->findBy(['company'=>$companyId]);
             } catch (AuthException $e) {
-                return $response->withStatus(401, $e->getMessage());
+                return $response->withStatus(403, $e->getMessage());
             } catch (\Doctrine\DBAL\Types\ConversionException $e) {
                 return $response->withStatus(400, 'Nieprawidlowy typ identyfikatora firmy');
             }
@@ -273,7 +273,7 @@ class UserController extends AbstractController
                 $this->checkPermissions($request, $user, 'manager.list.users');
                 $users = $this->em->getRepository(User::class)->findAll();
             } catch (AuthException $e) {
-                return $response->withStatus(401, $e->getMessage());
+                return $response->withStatus(403, $e->getMessage());
             }
         }
         return $response->withJson(['users' => $users], 200);
@@ -286,7 +286,7 @@ class UserController extends AbstractController
         } catch (NotFoundException $e) {
             return $response->withStatus(404, 'Nie mozesz zaprosic nowego uzytkownika');
         } catch (AuthException $e) {
-            return $response->withStatus(401, $e->getMessage());
+            return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)
