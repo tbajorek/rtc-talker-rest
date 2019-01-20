@@ -32,26 +32,30 @@ class UserController extends AbstractController
      * @throws \Exception
      */
     public function register(Http\Request $request, Http\Response $response): Http\Response {
-        $parsedBody = $request->getParsedBody();
-        if($parsedBody === null) {
-            return $response->withStatus(400, 'Zly format JSON');
-        }
-        $user = User::createFromRawData($parsedBody);
-        $firstUser = ($this->em->getRepository(User::class)->getNumberOfUsers() === 0);
-        if(is_string($parsedBody['company'])) {
-            $company = $this->em->getRepository(Company::class)->find($parsedBody['company']);
-            if($company === null) {
-                return $response->withStatus(404, 'Firma o podanym identyfikatorze nie istnieje');
+        try {
+            $parsedBody = $request->getParsedBody();
+            if($parsedBody === null) {
+                return $response->withStatus(400, 'Zly format JSON');
             }
-            $user->setCompany($company);
-            $user->setRole(USER::$USER);
-        } else {
-            if($firstUser) {
-                $user->setRole(USER::$ADMIN);
-                $user->setActivated(true);
+            $user = User::createFromRawData($parsedBody);
+            $firstUser = ($this->em->getRepository(User::class)->getNumberOfUsers() === 0);
+            if(is_string($parsedBody['company'])) {
+                $company = $this->em->getRepository(Company::class)->find($parsedBody['company']);
+                if($company === null) {
+                    return $response->withStatus(404, 'Firma o podanym identyfikatorze nie istnieje');
+                }
+                $user->setCompany($company);
+                $user->setRole(USER::$USER);
             } else {
-                $user->setRole(USER::$MANAGER);
+                if($firstUser) {
+                    $user->setRole(USER::$ADMIN);
+                    $user->setActivated(true);
+                } else {
+                    $user->setRole(USER::$MANAGER);
+                }
             }
+        } catch (\Throwable $e) {
+            return $response->withStatus(400, 'Błędne dane zapytania');
         }
         try {
             $this->em->persist($user);
