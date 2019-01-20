@@ -273,7 +273,7 @@ class UserController extends AbstractController
             }
         } else {
             try {
-                $this->checkPermissions($request, $user, 'manager.list.users');
+                $this->checkPermissions($request, $user, 'admin.list.users');
                 $users = $this->em->getRepository(User::class)->findAll();
             } catch (AuthException $e) {
                 return $response->withStatus(403, $e->getMessage());
