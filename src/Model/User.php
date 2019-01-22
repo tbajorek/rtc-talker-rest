@@ -121,7 +121,7 @@ class User implements \JsonSerializable {
     /**
      * @var float
      *
-     * @ORM\Column(type="decimal", nullable=false, precision=3, scale=2)
+     * @ORM\Column(type="decimal", nullable=false, precision=2, scale=1)
      */
     private $rate;
 

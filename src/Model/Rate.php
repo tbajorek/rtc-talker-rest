@@ -34,7 +34,7 @@ class Rate implements \JsonSerializable {
     /**
      * @var string
      *
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="decimal", , precision=2, scale=1, nullable=false)
      */
     private $rate;
 
@@ -44,6 +44,14 @@ class Rate implements \JsonSerializable {
      * @ORM\Column(type="string", nullable=true)
      */
     private $comment;
+
+    /**
+     * @var \RtcTalker\Model\OpenedTalk
+     *
+     * @ORM\OneToOne(targetEntity="OpenedTalk")
+     * @ORM\JoinColumn(name="rate_id", referencedColumnName="id")
+     */
+    private $openedTalk;
 
     /**
      * @return \Ramsey\Uuid\UuidInterface
@@ -115,6 +123,22 @@ class Rate implements \JsonSerializable {
     {
         $this->comment = $comment;
         return $this;
+    }
+
+    /**
+     * @return OpenedTalk
+     */
+    public function getOpenedTalk(): OpenedTalk
+    {
+        return $this->openedTalk;
+    }
+
+    /**
+     * @param OpenedTalk $openedTalk
+     */
+    public function setOpenedTalk(OpenedTalk $openedTalk): void
+    {
+        $this->openedTalk = $openedTalk;
     }
 
     /**

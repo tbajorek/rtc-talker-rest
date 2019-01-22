@@ -41,6 +41,7 @@ class RateController extends AbstractController
         $newRate->setUser($user);
         $newRate->setRate($parsedBody['rate']);
         $newRate->setComment($parsedBody['comment']);
+        $newRate->setOpenedTalk($talk);
         $user->updateRate($parsedBody['rate']);
         $this->em->persist($newRate);
         $this->em->merge($user);
