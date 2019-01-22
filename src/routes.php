@@ -39,7 +39,7 @@ $app->post('/company/{companyId}/departments', DepartmentController::class.':cre
 $app->put('/company/{companyId}/departments/{departmentId}', DepartmentController::class.':updateDepartment');//update data of department of a company (including workers)
 $app->delete('/company/{companyId}/departments/{departmentId}', DepartmentController::class.':removeDepartment');//remote department of a company
 
-$app->post('/user/{userId}/online', UserController::class.':online');//set online status - for debugging
+$app->put('/user/{userId}/online', UserController::class.':online');//set online status - for debugging
 
 $app->get('/options/{companyId}', OptionsController::class.':options');//get options for a site
 $app->get('/options/{companyId}/departments/{departmentId}', OptionsController::class.':users');//list of users available for the department
