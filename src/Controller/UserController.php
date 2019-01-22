@@ -13,6 +13,7 @@ use RtcTalker\Exception\InputDataException;
 use RtcTalker\Model\Availability;
 use RtcTalker\Model\Company;
 use RtcTalker\Model\Department;
+use RtcTalker\Model\Online;
 use RtcTalker\Model\Session;
 use RtcTalker\Exception\NotFoundException;
 use Slim\Http;
@@ -282,47 +283,34 @@ class UserController extends AbstractController
         return $response->withJson(['users' => $users], 200);
     }
 
-    public function invite(Http\Request $request, Http\Response $response, array $args): Http\Response {
+    public function online(Http\Request $request, Http\Response $response, array $args): Http\Response {
         try {
             $user = $this->getUserFromToken($request);
-            $this->checkPermissions($request, $user, 'manager.invite.user');
-        } catch (NotFoundException $e) {
-            return $response->withStatus(404, 'Nie mozesz zaprosic nowego uzytkownika');
-        } catch (AuthException $e) {
+            $this->checkPermissions($request, $user, 'user.online.change');
+        }  catch (AuthException $e) {
             return $response->withStatus(403, $e->getMessage());
         }
         $parsedBody = $request->getParsedBody();
         if(!is_array($parsedBody)
-            || !key_exists('email', $parsedBody)
-            || !key_exists('name', $parsedBody)
-            || !key_exists('surname', $parsedBody)
+            || !key_exists('online', $parsedBody)
         ) {
             return $response->withStatus(400, 'Nie dostarczyles wszystkich wymaganych danych');
         }
-
-        $foundUser = $this->em->getRepository(User::class)->findOneBy(['email'=>$parsedBody['email']]);
-        if($foundUser!== null) {
-            return $response->withStatus(400, 'Nie mozesz zaprosic juz istniejacego uzytkownika');
+        if($parsedBody['online']) {
+            $online = new Online();
+            $online->setUser($user);
+            $this->em->persist($online);
+        } else {
+            $online = $this->em->getRepository(Online::class)->findBy(['user'=>$user]);
+            if($online === null) {
+                return $response->withStatus(404, 'Uzytkownik nie jest online');
+            } else {
+                $this->em->remove($online);
+            }
         }
-        $company = $user->getCompany();
-        $mail = new Message();
-        $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]:8080/register?companyId=".$company->getId()->toString();
-        $body = "Witaj ".$parsedBody['name'].' '.$parsedBody['surname']
-            .'!<br />Chcialbym Cie zaprosic do dolaczenia do naszej firmy w systemie RTC Talker. '
-            .'Aby to zrobic kliknij w <a href="'.$link.'" target="_blank">TEN LINK</a>.<br /><br />'
-            .'Pozdrawiam serdecznie<br />'.$user->getName().' '.$user->getSurname();
-
-        $mail->setFrom($user->getEmail(), $user->getName().' '.$user->getSurname())
-            ->addTo($parsedBody['email'])
-            ->setSubject('Zaproszenie do firmy '.$company->getName())
-            ->setHTMLBody($body);
-        try {
-            $mailer = new SendmailMailer();
-            $mailer->send($mail);
-        } catch (\Exception $e) {
-            return $response->withStatus(418, 'Mechanizm wysylania maili nie dziala prawidlowo');
-        }
+        $this->em->flush();
         return $response->withStatus(200, 'Zaproszenie zostalo wyslane');
+
     }
 
     private function getPayload(Http\Request $request, Http\Response $response, ?callable $checkFn = null) {

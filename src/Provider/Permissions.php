@@ -18,7 +18,8 @@ class Permissions {
                 'user.view.my.company',
                 'user.view.company.departments',
                 'user.address.add',
-                'user.address.update'
+                'user.address.update',
+                'user.online.change'
             ];
             $permissions[User::$MANAGER] = array_merge($permissions[User::$USER], [
                 'company.create',
