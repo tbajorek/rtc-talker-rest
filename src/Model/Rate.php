@@ -34,7 +34,7 @@ class Rate implements \JsonSerializable {
     /**
      * @var string
      *
-     * @ORM\Column(type="decimal", , precision=2, scale=1, nullable=false)
+     * @ORM\Column(type="decimal", precision=2, scale=1, nullable=false)
      */
     private $rate;
 
