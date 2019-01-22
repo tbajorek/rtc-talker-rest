@@ -37,15 +37,19 @@ class RateController extends AbstractController
         if($talk === null) {
             return $response->withStatus(404, 'Rozmowa nie istnieje');
         }
-        $newRate = new Rate();
-        $newRate->setUser($user);
-        $newRate->setRate($parsedBody['rate']);
-        $newRate->setComment($parsedBody['comment']);
-        $newRate->setOpenedTalk($talk);
-        $user->updateRate($parsedBody['rate']);
-        $this->em->persist($newRate);
-        $this->em->merge($user);
-        $this->em->flush();
+        try {
+            $newRate = new Rate();
+            $newRate->setUser($user);
+            $newRate->setRate($parsedBody['rate']);
+            $newRate->setComment($parsedBody['comment']);
+            $newRate->setOpenedTalk($talk);
+            $user->updateRate($parsedBody['rate']);
+            $this->em->persist($newRate);
+            $this->em->merge($user);
+            $this->em->flush();
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+            return $response->withStatus(409, 'Nie możesz ponownie ocenić rozmowy');
+        }
         return $response->withJson($newRate, 201);
     }
 }
