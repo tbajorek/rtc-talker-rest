@@ -48,7 +48,7 @@ class RateController extends AbstractController
             $this->em->merge($user);
             $this->em->flush();
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
-            return $response->withStatus(409, 'Nie możesz ponownie ocenić rozmowy');
+            return $response->withStatus(409, 'Nie mozesz ponownie ocenic rozmowy');
         }
         return $response->withJson($newRate, 201);
     }
