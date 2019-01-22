@@ -63,6 +63,9 @@ class CompanyController extends AbstractController {
             return $response->withStatus(400, 'Nie podales wszystkich wymaganych danych');
         }
         $newCompany = new Company();
+        if(!$newCompany->validateNip($parsedBody['nip'])) {
+            return $response->withStatus(400, 'Bledny numer NIP');
+        }
         $newCompany->setName($parsedBody['name'])
                    ->setNip($parsedBody['nip'])
                    ->setWorkers([$user])
@@ -97,6 +100,9 @@ class CompanyController extends AbstractController {
             $company->setName($parsedBody['name']);
         }
         if(key_exists('nip', $parsedBody)) {
+            if(!$company->validateNip($parsedBody['nip'])) {
+                return $response->withStatus(400, 'Bledny numer NIP');
+            }
             $company->setNip($parsedBody['nip']);
         }
         if(key_exists('address', $parsedBody)) {

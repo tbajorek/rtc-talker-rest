@@ -245,6 +245,19 @@ class Company implements \JsonSerializable {
         return $this;
     }
 
+    public function validateNip(string $nip) : bool {
+        $nipWithoutDashes = str_replace('-', '', $nip);
+        $reg = '/^\d{10}$/';
+        if(preg_match($reg, $nipWithoutDashes)===false) {
+            return false;
+        } else {
+            $digits = str_split($nipWithoutDashes);
+            $checksum = (6*(int)$digits[0] + 5* (int)$digits[1] + 7* (int)$digits[2] + 2* (int)$digits[3] + 3* (int)$digits[4] + 4* (int)$digits[5] + 5* (int)$digits[6] + 6* (int)$digits[7] + 7* (int)$digits[8])%11;
+
+            return ((int)$digits[9] === $checksum);
+        }
+    }
+
     /**
      * @return array
      */
