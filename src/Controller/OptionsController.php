@@ -65,7 +65,7 @@ class OptionsController extends AbstractController
             $this->em->flush();
             return $response->withJson(['user' => $chosenUser->jsonPublicSerialize(), 'talkId' => $openedTalk->getId()->toString()], 200);
         } else {
-            return $response->withStatus(404, 'Żaden uzytkownik nie zostal dla Ciebie znaleziony');
+            return $response->withStatus(404, 'Zaden uzytkownik nie zostal dla Ciebie znaleziony');
         }
     }
 
