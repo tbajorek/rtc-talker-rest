@@ -49,7 +49,7 @@ class Rate implements \JsonSerializable {
      * @var \RtcTalker\Model\OpenedTalk
      *
      * @ORM\OneToOne(targetEntity="OpenedTalk")
-     * @ORM\JoinColumn(name="rate_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="opened_talk_id", referencedColumnName="id")
      */
     private $openedTalk;
 
