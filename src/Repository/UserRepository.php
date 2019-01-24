@@ -11,7 +11,8 @@ use RtcTalker\Model\Online;
 use RtcTalker\Model\User;
 
 class UserRepository extends EntityRepository{
-    public function getNumberOfUsers() {
+    public function getNumberOfUsers(): ?int
+    {
         $em = $this->getEntityManager();
         $query = $em->createQuery('SELECT COUNT(u) FROM \\RtcTalker\\Model\\User u');
         $result = $query->getSingleScalarResult();
@@ -21,6 +22,7 @@ class UserRepository extends EntityRepository{
             return -1;
         }
     }
+
     public function getOnlineForCompanyAndDepartment(Company $company, Department $department) {
         $em = $this->getEntityManager();
 

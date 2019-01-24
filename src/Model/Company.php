@@ -160,7 +160,7 @@ class Company implements \JsonSerializable {
      */
     public function hasWorker(User $worker) : bool {
         $foundWorkers = array_filter($this->getWorkers()->getValues(), function (User $assignedWorker) use ($worker) : bool {
-            return $assignedWorker->getId() === $worker;
+            return $assignedWorker->getId() === $worker->getId();
         });
         return count($foundWorkers) > 0;
     }

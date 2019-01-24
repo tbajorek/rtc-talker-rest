@@ -1,0 +1,90 @@
+{
+  "id": "610e0e11-3c3e-4dae-a402-079f2f1a9d13",
+  "name": "RTC_Talker_test",
+  "values": [
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "http://tbajorek.pl:8081",
+      "key": "host",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "emailA@example.com",
+      "key": "emailA",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "emailB@example.com",
+      "key": "emailB",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "Password1A!",
+      "key": "passwordA",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "Password1B!",
+      "key": "passwordB",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "TomaszA",
+      "key": "nameA",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "TomaszB",
+      "key": "nameB",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "1077264771",
+      "key": "companyNip",
+      "enabled": true
+    },
+    {
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "value": "TBajorek Corp.",
+      "key": "companyName",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2019-01-22T22:11:39.292Z",
+  "_postman_exported_using": "Postman/6.2.3"
+}

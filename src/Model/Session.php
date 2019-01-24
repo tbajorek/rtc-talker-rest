@@ -161,7 +161,7 @@ class Session implements \JsonSerializable {
         ];
     }
 
-    public static function createForUser(Request $request, User $user, array $scopes = []) {
+    public static function createForUser(Request $request, User $user) {
         $uri = $request->getUri();
         $url = $uri->getScheme().'://'.$uri->getHost();
         $start = new \DateTime();
@@ -173,8 +173,8 @@ class Session implements \JsonSerializable {
             "exp" => $end->getTimestamp(),
             "sub" => $user->getId()
         ];
-        $token = JWT::encode($data, getSecret(dirname(__DIR__, 2).'/secret.key'), "HS256");
-        $session = new Session();
+        $token = JWT::encode($data, getSecret(dirname(__DIR__, 2).'/secret.key'), 'HS256');
+        $session = new self();
         $session->setToken($token)
                 ->setUser($user)
                 ->setIp($request->getAttribute('ip_address'))

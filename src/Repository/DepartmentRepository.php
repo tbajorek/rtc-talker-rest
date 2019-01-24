@@ -7,7 +7,8 @@ use RtcTalker\Model\Company;
 use RtcTalker\Model\Online;
 
 class DepartmentRepository extends EntityRepository{
-    public function getOnlineForCompany(Company $company) {
+    public function getOnlineForCompany(Company $company): array
+    {
         $em = $this->getEntityManager();
 
         $onlineQueryBuilder = $em->createQueryBuilder();

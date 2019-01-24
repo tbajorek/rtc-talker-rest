@@ -26,8 +26,6 @@ class OptionsController extends AbstractController
         }
         $onlineDepartments = $this->em->getRepository(Department::class)->getOnlineForCompany($company);
 
-        //var_dump($onlineUsers);
-        //die();
         return $response->withJson(['departments' => $onlineDepartments], 200);
     }
 

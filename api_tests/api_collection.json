@@ -1,0 +1,2248 @@
+{
+	"info": {
+		"_postman_id": "7f70ad59-5a62-41d1-a605-17c898b6c056",
+		"name": "RTC_Talker_test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"_postman_id": "e9053a94-43b8-40b5-bbaf-9a8ef135014d",
+			"name": "1. Zarejestrowanie użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2eb82ef5-212e-42c3-8115-3a0b338b5689",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nowy uzytkownik zostal zarejestrowany\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailA}}\",\n\t\"password\": \"{{passwordA}}\",\n\t\"name\": \"{{nameA}}\",\n\t\"surname\": \"Bajorek\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/account",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"account"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "f6a19f59-ed77-4bfa-8eb0-c49ea1698928",
+			"name": "2. Złe hasło przy logowaniu dla użycia A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "37e72a36-7364-4cc3-ba9c-a8b899102361",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie mozesz zostac zalogowany w systemie\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailA}}\",\n\t\"password\": \"{{passwordA}}bad\",\n\t\"remember\": true\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/session",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "78c701fb-4687-4c7e-bf44-063bd49494eb",
+			"name": "3. Zalogowanie użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9e5c2ba4-dbee-4040-a512-8865321cfc80",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200 or 201\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    if(pm.response.code === 201) {",
+							"        pm.response.to.have.status(\"Created\");",
+							"    } else {",
+							"        pm.response.to.have.status(\"OK\");",
+							"    }",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"token\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"user\": {",
+							"        \"type\": \"object\"",
+							"    },",
+							"    \"ip\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"validUntil\": {",
+							"        \"type\": \"string\"",
+							"    }",
+							"  }",
+							"};",
+							"var userSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"name\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"surname\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"role\": {",
+							"        \"type\": \"number\"",
+							"    },",
+							"    \"registered_at\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"address\": {",
+							"        \"type\": [\"null\", \"object\"]",
+							"    },",
+							"    \"company\": {",
+							"        \"type\": [\"null\", \"object\"]",
+							"    },",
+							"    \"departments\": {",
+							"        \"type\": \"array\"",
+							"    },",
+							"    \"availability\": {",
+							"        \"type\": \"array\"",
+							"    }",
+							"  }",
+							"};",
+							"",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"  pm.expect(tv4.validate(jsonData.user, userSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.user.name).to.eql(pm.environment.get('nameA'));",
+							"    pm.expect(jsonData.user.email).to.eql(pm.environment.get('emailA'));",
+							"    pm.expect(jsonData.user.role).to.eql(4);",
+							"});",
+							"",
+							"pm.globals.set(\"tokenA\", jsonData.token);",
+							"pm.globals.set(\"userIdA\", jsonData.user.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailA}}\",\n\t\"password\": \"{{passwordA}}\",\n\t\"remember\": true\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/session",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "99a6320b-048e-4fdb-876d-6f89b9867b2a",
+			"name": "4. Dodanie adresu przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "210ad53c-8ec6-46a0-99ce-2cb8688be597",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Created\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var addressSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"street\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"buildingNumber\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"postCode\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"city\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"country\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"phone\": {",
+							"        \"type\": \"string\"",
+							"    }",
+							"  }",
+							"};",
+							"",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData.address, addressSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.address.street).to.eql('Jaśminowa');",
+							"    pm.expect(jsonData.address.buildingNumber).to.eql('25');",
+							"    pm.expect(jsonData.address.postCode).to.eql('30-123');",
+							"    pm.expect(jsonData.address.city).to.eql('Kraków');",
+							"    pm.expect(jsonData.address.country).to.eql('Poland');",
+							"    pm.expect(jsonData.address.phone).to.eql('456987123');",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"street\": \"Jaśminowa\",\n\t\"building_number\": \"25\",\n\t\"post_code\": \"30-123\",\n\t\"city\": \"Kraków\",\n\t\"country\": \"Poland\",\n\t\"phone\": \"456987123\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/me/address",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "134db3a3-f4d2-46cf-8082-a0453418acdc",
+			"name": "5. Dodanie nowej firmy AA przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5d3d6e96-5923-4cae-9b25-528d7f0ebf89",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Created\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var companySchema = {",
+							"    \"properties\": {",
+							"        \"id\": {",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"name\": {",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"nip\": {",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"address\": {",
+							"            \"type\": \"object\"",
+							"        },",
+							"        \"departments\": {",
+							"            \"type\": \"array\"",
+							"        },",
+							"        \"workers\": {",
+							"            \"type\": \"array\"",
+							"        }",
+							"    }",
+							"};",
+							"var addressSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"street\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"buildingNumber\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"postCode\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"city\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"country\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"phone\": {",
+							"        \"type\": \"string\"",
+							"    }",
+							"  }",
+							"};",
+							"",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, addressSchema)).to.be.true;",
+							"  pm.expect(tv4.validate(jsonData.address, addressSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.address.street).to.eql('Reymonta');",
+							"    pm.expect(jsonData.address.buildingNumber).to.eql('17/263A');",
+							"    pm.expect(jsonData.address.postCode).to.eql('30-059');",
+							"    pm.expect(jsonData.address.city).to.eql('Kraków');",
+							"    pm.expect(jsonData.address.country).to.eql('Poland');",
+							"    pm.expect(jsonData.address.phone).to.eql('456987136');",
+							"    pm.expect(jsonData.departments).to.eql([]);",
+							"    pm.expect(jsonData.workers).to.eql([pm.globals.get('userIdA')]);",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get(\"companyName\"));",
+							"    pm.expect(jsonData.nip).to.eql(pm.environment.get(\"companyNip\"));",
+							"});",
+							"",
+							"pm.globals.set(\"companyIdAA\", jsonData.id);"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "abfb2157-66a4-47f3-a88f-7844225ebfe8",
+						"type": "text/javascript",
+						"exec": [
+							"pm.environment.set(\"companyName\", \"Big Computers\");",
+							"pm.environment.set(\"companyNip\", \"3770733332\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{companyName}}\",\n\t\"nip\": \"{{companyNip}}\",\n\t\"address\": {\n\t\t\"street\": \"Reymonta\",\n\t\t\"building_number\": \"17/263A\",\n\t\t\"post_code\": \"30-059\",\n\t\t\"city\": \"Kraków\",\n\t\t\"country\": \"Poland\",\n\t\t\"phone\": \"456987136\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/me/company",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "22d6f3b5-856b-4583-afef-34165bfb0863",
+			"name": "6. Zarejestrowanie użytkownika B do firmy AA",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fc5b6f80-1e91-41d0-92f2-bdaf531d5984",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nowy uzytkownik zostal zarejestrowany\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailB}}\",\n\t\"password\": \"{{passwordB}}\",\n\t\"name\": \"{{nameB}}\",\n\t\"surname\": \"Bajorek\",\n\t\"company\": \"{{companyIdAA}}\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/account",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"account"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "0a1e1843-8690-489f-9b1a-41f76285938b",
+			"name": "7. Próba zalogowania użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a90fca42-a2bf-41c6-8dde-290c8c3c5b71",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Twoje konto nie jest aktywowane\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailB}}\",\n\t\"password\": \"{{passwordB}}\",\n\t\"remember\": true\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/session",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "4b0d034a-460f-4387-8c0e-d83695c8f7ff",
+			"name": "8. Pobranie listy wszystkich użytkowników przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ca9c6361-5e8e-4ca9-ace1-8b6f77bd4508",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"items\": {",
+							"        \"type\": \"object\"",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct number of users', function() {",
+							"  pm.expect(jsonData.users.length).to.eql(2);",
+							"});",
+							"",
+							"if(jsonData.users[1].email === pm.environment.get('emailB')) {",
+							"    var userIdB = jsonData.users[1].id;",
+							"} else {",
+							"    var userIdB = jsonData.users[0].id;",
+							"}",
+							"pm.globals.set(\"userIdB\", userIdB);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/users",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "84cf5dc7-224b-462d-b131-4432f2838fc7",
+			"name": "9. Aktywowanie użytkownika B przez A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0c2eb6a1-a9e4-49f4-8909-ad66b0a81c99",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test('User is activated', function() {",
+							"  pm.expect(jsonData.id).to.eql(pm.globals.get('userIdB'));",
+							"  pm.expect(jsonData.activated).to.eql(true);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": 1\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/{{userIdB}}/activated",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"{{userIdB}}",
+						"activated"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "315a38ba-02f3-4110-9290-4bc3d28558cc",
+			"name": "10. Zalogowanie użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2b780327-317d-491d-97c5-87d50f7be2ac",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200 or 201\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    if(pm.response.code === 201) {",
+							"        pm.response.to.have.status(\"Created\");",
+							"    } else {",
+							"        pm.response.to.have.status(\"OK\");",
+							"    }",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"token\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"user\": {",
+							"        \"type\": \"object\"",
+							"    },",
+							"    \"ip\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"validUntil\": {",
+							"        \"type\": \"string\"",
+							"    }",
+							"  }",
+							"};",
+							"var userSchema = {",
+							"  \"properties\": {",
+							"    \"id\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"name\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"surname\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"role\": {",
+							"        \"type\": \"number\"",
+							"    },",
+							"    \"registered_at\": {",
+							"        \"type\": \"string\"",
+							"    },",
+							"    \"address\": {",
+							"        \"type\": [\"null\", \"object\"]",
+							"    },",
+							"    \"company\": {",
+							"        \"type\": [\"null\", \"object\"]",
+							"    },",
+							"    \"departments\": {",
+							"        \"type\": \"array\"",
+							"    },",
+							"    \"availability\": {",
+							"        \"type\": \"array\"",
+							"    }",
+							"  }",
+							"};",
+							"",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"  pm.expect(tv4.validate(jsonData.user, userSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.user.name).to.eql(pm.environment.get('nameB'));",
+							"    pm.expect(jsonData.user.email).to.eql(pm.environment.get('emailB'));",
+							"    pm.expect(jsonData.user.role).to.eql(2);",
+							"});",
+							"",
+							"pm.globals.set(\"tokenB\", jsonData.token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"{{emailB}}\",\n\t\"password\": \"{{passwordB}}\",\n\t\"remember\": true\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/session",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"session"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "9d2a1860-36fa-42b9-a9f5-b2b6430c5ae8",
+			"name": "11. Pobranie informacji o swoim profilu przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fbcfa1f7-1c35-4aef-b72d-cc36fcba0244",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('nameB'));",
+							"    pm.expect(jsonData.email).to.eql(pm.environment.get('emailB'));",
+							"    pm.expect(jsonData.role).to.eql(2);",
+							"    pm.expect(jsonData.company.id).to.eql(pm.globals.get('companyIdAA'));",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/user/me",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "976284e4-ce0c-42b4-8b00-cdf1c8dd1931",
+			"name": "12. Próba pobrania informacji o profilu użytkownika A przez B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9b30b9f8-2f7a-4317-b3d1-6a2a91ce1f47",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Ten token nie nalezy do Ciebie\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/user/{{userIdA}}/profile",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"{{userIdA}}",
+						"profile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "599aceec-954e-4a3b-8b1b-81374577f02e",
+			"name": "13. Zmiana adresu użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "9defc519-4c55-4be7-a945-267799fcf9cd",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.id).to.eql(pm.globals.get('userIdA'));",
+							"    pm.expect(jsonData.company.id).to.eql(pm.globals.get('companyIdAA'));",
+							"    pm.expect(jsonData.address.street).to.eql('Jana Kazimierza');",
+							"    pm.expect(jsonData.address.buildingNumber).to.eql('72');",
+							"    pm.expect(jsonData.address.postCode).to.eql('30-559');",
+							"    pm.expect(jsonData.address.city).to.eql('Kraków');",
+							"    pm.expect(jsonData.address.country).to.eql('Poland');",
+							"    pm.expect(jsonData.address.phone).to.eql('874963195');",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"street\": \"Jana Kazimierza\",\n\t\"building_number\": \"72\",\n\t\"post_code\": \"30-559\",\n\t\"city\": \"Kraków\",\n\t\"country\": \"Poland\",\n\t\"phone\": \"874963195\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/me/address",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"address"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "26a7981f-6230-4dd9-96ce-fa72473ee37f",
+			"name": "14. Pobranie informacji o firmie AA przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "813e0d09-4c1e-418f-ac34-728f71f85e16",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('companyName'));",
+							"    pm.expect(jsonData.nip).to.eql(pm.environment.get('companyNip'));",
+							"    pm.expect(jsonData.workers).to.eql([",
+							"        pm.globals.get('userIdA'), pm.globals.get('userIdB')",
+							"    ]);",
+							"    pm.expect(jsonData.id).to.eql(pm.globals.get('companyIdAA'));",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/user/me/company",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "c7248d96-d4b2-4003-9c2b-21b651ba8a59",
+			"name": "15. Zmiana adresu oraz danych firmy AA przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "90cdd7f1-25f4-4247-8ed6-fd67ef8606ee",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"companyName\", \"TBajorek Corp.\");",
+							"pm.environment.set(\"companyNip\", \"1077264771\");",
+							"",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('companyName'));",
+							"    pm.expect(jsonData.nip).to.eql(pm.environment.get('companyNip'));",
+							"    pm.expect(jsonData.workers).to.eql([",
+							"        pm.globals.get('userIdA'), pm.globals.get('userIdB')",
+							"    ]);",
+							"    pm.expect(jsonData.id).to.eql(pm.globals.get('companyIdAA'));",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"TBajorek Corp.\",\n\t\"nip\": \"1077264771\",\n\t\"address\": {\n\t\t\"street\": \"Reymontaka\",\n\t\t\"building_number\": \"17/263A\",\n\t\t\"post_code\": \"30-059\",\n\t\t\"city\": \"Kraków\",\n\t\t\"country\": \"Poland\",\n\t\t\"phone\": \"987654321\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/me/company",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"company"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "413cc689-8c31-4e38-8aa9-ab191beffe95",
+			"name": "16. Utworzenie departamentu DA1 przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f097493b-707b-438a-88f5-f3b493eafa13",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Created\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.name).to.eql('Biuro Obsługi Klienta');",
+							"    pm.expect(jsonData.workers).to.eql([]);",
+							"});",
+							"",
+							"pm.globals.set(\"departmentIdDA1\", jsonData.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Biuro Obsługi Klienta\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "680d4248-0d8d-4c83-92dc-3fc1b3a53066",
+			"name": "17. Utworzenie departamentu DA2 przez użytkownika A z przypisaniem A i B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "708ef730-17b4-4a90-a188-a4d02265481f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Created\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.name).to.eql('Księgowość');",
+							"    pm.expect(jsonData.workers).to.eql([",
+							"        pm.globals.get('userIdA'), pm.globals.get('userIdB'),",
+							"    ]);",
+							"});",
+							"",
+							"pm.globals.set(\"departmentIdDA2\", jsonData.id);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Księgowość\",\n\t\"workers\": [\"{{userIdA}}\", \"{{userIdB}}\"]\n}"
+				},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "52939157-574e-41b3-a7ff-6261b4d7da29",
+			"name": "18. Pobranie listy departamentów firmy AA przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1428d609-6042-4a46-a8e9-2d0117ae51b0",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.departments.length).to.eql(2);",
+							"    pm.expect(jsonData.companyId).to.eql(pm.globals.get('companyIdAA'));",
+							"    ",
+							"    if(jsonData.departments[0].id === pm.globals.get('departmentIdDA1')) {",
+							"        pm.expect(jsonData.departments[0].workers.length).to.eql(0);",
+							"        pm.expect(jsonData.departments[1].workers.length).to.eql(2);",
+							"    } else {",
+							"        pm.expect(jsonData.departments[0].workers.length).to.eql(2);",
+							"        pm.expect(jsonData.departments[1].workers.length).to.eql(0);",
+							"    }",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "8eaceaf4-2faf-422e-868e-5e90232a85c2",
+			"name": "19. Próba utworzenia departamentu przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d192a2cf-c8f8-424d-8a34-c4eedce5120e",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie masz uprawnien do wykonania tej akcji\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Trzeci departament\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "904e192e-2673-40a0-9555-230121565e9f",
+			"name": "20. Przypisanie użytkownika B do departamentu DA1 przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eac08c8f-fc82-47e5-9223-1df26c79f190",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.departments.length).to.eql(2);",
+							"    ",
+							"    if(jsonData.departments[0].id === pm.globals.get('departmentIdDA1')) {",
+							"        pm.expect(jsonData.departments[1].id).to.eql(pm.globals.get('departmentIdDA2'));",
+							"    } else {",
+							"        pm.expect(jsonData.departments[0].id).to.eql(pm.globals.get('departmentIdDA2'));",
+							"        pm.expect(jsonData.departments[1].id).to.eql(pm.globals.get('departmentIdDA1'));",
+							"    }",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": [\"{{departmentIdDA1}}\", \"{{departmentIdDA2}}\"]\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/{{userIdB}}/departments",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"{{userIdB}}",
+						"departments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "6e75c43e-7cc7-4f62-8840-94b9ea7ea889",
+			"name": "21. Próba usunięcia departamentu DA1 przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "798d832b-dfc1-4fab-918f-b40d1d391ec8",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie masz uprawnien do wykonania tej akcji\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments/{{departmentIdDA1}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments",
+						"{{departmentIdDA1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "ac481c7c-bd43-4ea6-8c18-e70992207c6a",
+			"name": "22. Usunięcie departamentu DA1 przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "621f60b9-3355-4677-a394-bc6cb6e723dd",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Departament zostal usuniety\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/company/{{companyIdAA}}/departments/{{departmentIdDA1}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"company",
+						"{{companyIdAA}}",
+						"departments",
+						"{{departmentIdDA1}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "f8895a32-abaf-4c32-8166-b0a84aea44ed",
+			"name": "23. Pobranie listy firm przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "73c24653-149b-4de1-9e85-8e8bab4d2899",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.companies.length).to.eql(1);",
+							"    var company = jsonData.companies[0];",
+							"    ",
+							"    pm.expect(company.id).to.eql(pm.globals.get('companyIdAA'));",
+							"    pm.expect(company.workers.length).to.eql(2);",
+							"    pm.expect(company.departments.length).to.eql(1);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/companies",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"companies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "ce48423e-bec4-47dd-ab49-e1fcb24ef8fe",
+			"name": "24. Błąd pobrania listy firm przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "60015fff-1540-4f61-bcd9-3ed06eb8e182",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie masz uprawnien do wykonania tej akcji\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/companies",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"companies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "e8c7f3f8-7d83-49d3-ae7a-9505bd651ae4",
+			"name": "25. Pobranie listy pracowników firmy AA przez użytkownika A",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ea35b0be-a659-4e5e-8746-561c1d192b43",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"items\": {",
+							"        \"type\": \"object\"",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct number of users', function() {",
+							"  pm.expect(jsonData.users.length).to.eql(2);",
+							"});",
+							"",
+							"if(jsonData.users[0].email === pm.environment.get('emailA')) {",
+							"    pm.expect(jsonData.users[1].email).to.eql(pm.environment.get('emailB'));",
+							"} else {",
+							"    pm.expect(jsonData.users[0].email).to.eql(pm.environment.get('emailB'));",
+							"    pm.expect(jsonData.users[1].email).to.eql(pm.environment.get('emailA'));",
+							"}"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenA}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/users/{{companyIdAA}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						"{{companyIdAA}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "a8c6a62b-4d5b-49aa-a408-067de3aba131",
+			"name": "26. Próba pobrania listy pracowników firmy AA przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4a0cc08d-9c42-4435-8d20-aad603f7d974",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie masz uprawnien do wykonania tej akcji\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/users/{{companyIdAA}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						"{{companyIdAA}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "029b534d-53c6-4380-b803-db39b695c779",
+			"name": "27. Próba pobrania listy departamentów gotowych do rozmowy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbd4d7ac-42bd-4f48-a87d-56659b28d83f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"properties\": {",
+							"        \"departments\": {",
+							"            \"type\": \"array\"",
+							"        }",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct available department', function() {",
+							"  pm.expect(jsonData.departments.length).to.eql(0);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/options/{{companyIdAA}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"options",
+						"{{companyIdAA}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "e18a44b4-e83f-4944-bcce-cbfd842c5866",
+			"name": "28. Wybranie kanałów komunikacji audio oraz chat przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "21ed1336-b7d2-475b-bdcf-86817d76d71b",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.test(\"Values are correct\", function () {",
+							"    pm.expect(jsonData.availability.length).to.eql(2);",
+							"    pm.expect(jsonData.availability).to.eql(['audio', 'chat']);",
+							"    pm.expect(jsonData.id).to.eql(pm.globals.get('userIdB'));",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": [\"audio\", \"chat\"]\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/{{userIdB}}/availability",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"{{userIdB}}",
+						"availability"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "8a4b3a4b-a35e-4229-a4cc-4b742c5b29ab",
+			"name": "29. Włączenie dostępności przez użytkownika B",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1a75b1d9-ff81-436f-88e6-c0aaca87519d",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{tokenB}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"online\": 1\n}"
+				},
+				"url": {
+					"raw": "{{host}}/user/me/online",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"user",
+						"me",
+						"online"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "11dea7a4-8db8-4df3-a0c3-6b5c8a5778ae",
+			"name": "30. Pobranie listy departamentów gotowych do rozmowy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "2253a138-8842-43b1-b53b-9dee598dc246",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"properties\": {",
+							"        \"departments\": {",
+							"            \"type\": \"array\"",
+							"        }",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct available department', function() {",
+							"  pm.expect(jsonData.departments.length).to.eql(1);",
+							"  pm.expect(jsonData.departments[0].id).to.eql(pm.globals.get('departmentIdDA2'));",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/options/{{companyIdAA}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"options",
+						"{{companyIdAA}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "9c2d88ff-1e7f-451a-b896-e0a515f4ac24",
+			"name": "31. Pobranie listy użytkowników dla departamentu DA2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "f4f3a695-e82b-4b88-97b2-8121aa8d72f5",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"properties\": {",
+							"        \"users\": {",
+							"            \"type\": \"array\"",
+							"        }",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct available department', function() {",
+							"  pm.expect(jsonData.users.length).to.eql(1);",
+							"  pm.expect(jsonData.users[0].id).to.eql(pm.globals.get('userIdB'));",
+							"  pm.expect(jsonData.users[0].availability.length).to.eql(2);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/options/{{companyIdAA}}/departments/{{departmentIdDA2}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"options",
+						"{{companyIdAA}}",
+						"departments",
+						"{{departmentIdDA2}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "27ba11b4-30b2-4cc9-b6fc-a84e788414d6",
+			"name": "32. Próba żądania odbycia rozmowy z DA2 dla typu wideo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "eead38c3-d02d-4bf1-9939-d12f5811429f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Zaden uzytkownik nie zostal dla Ciebie znaleziony\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/options/{{companyIdAA}}/departments/{{departmentIdDA2}}/types/video",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"options",
+						"{{companyIdAA}}",
+						"departments",
+						"{{departmentIdDA2}}",
+						"types",
+						"video"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "5ddd37f9-dccd-4214-a331-7fa04b1f8562",
+			"name": "33. Zgłoszenie żądania odbycia rozmowy z DA2 dla typu audio",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a716c677-83d0-42db-9ce0-22e9c1314aa1",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"OK\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"properties\": {",
+							"        \"user\": {",
+							"            \"type\": \"object\"",
+							"        },",
+							"        \"talkId\": {",
+							"            \"type\": \"string\"",
+							"        }",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});",
+							"",
+							"pm.test('Correct chosen user', function() {",
+							"  pm.expect(jsonData.user.id).to.eql(pm.globals.get('userIdB'));",
+							"});",
+							"",
+							"pm.globals.set(\"talkId\", jsonData.talkId);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{host}}/options/{{companyIdAA}}/departments/{{departmentIdDA2}}/types/audio",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"options",
+						"{{companyIdAA}}",
+						"departments",
+						"{{departmentIdDA2}}",
+						"types",
+						"audio"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "e8eb6262-26e0-48db-bbfd-8ea25b3fc786",
+			"name": "34. Wystawienie oceny pracownikowi po rozmowie",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f43ff26-cbfb-4233-be5a-dc9f51797f95",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Created\");",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"var mainSchema = {",
+							"    \"properties\": {",
+							"        \"id\": {",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"rate\": {",
+							"            \"type\": \"string\"",
+							"        },",
+							"        \"comment\": {",
+							"            \"type\": \"string\"",
+							"        }",
+							"    }",
+							"};",
+							"pm.test('Schema is valid', function() {",
+							"  pm.expect(tv4.validate(jsonData, mainSchema)).to.be.true;",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"rate\": 4.5,\n\t\"comment\": \"Testowy rate\",\n\t\"talk_id\": \"{{talkId}}\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/rates/{{userIdB}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rates",
+						"{{userIdB}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"_postman_id": "62c5a0e0-8616-49a9-bbd4-59a097f59337",
+			"name": "35. Próba ponownego wystawienia oceny za tę samą rozmowę",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "6bbfad18-aa18-4750-96d7-ddde91f8da68",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Status code is 409\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Status code name has correct string\", function () {",
+							"    pm.response.to.have.status(\"Nie mozesz ponownie ocenic rozmowy\");",
+							"});",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"rate\": 4.5,\n\t\"comment\": \"Testowy rate\",\n\t\"talk_id\": \"{{talkId}}\"\n}"
+				},
+				"url": {
+					"raw": "{{host}}/rates/{{userIdB}}",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"rates",
+						"{{userIdB}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

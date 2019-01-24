@@ -112,7 +112,7 @@ class UserController extends AbstractController
                 return $response->withJson($activeSession, 200);
             }
         }
-        $session = Session::createForUser($request, $user, Permissions::getForRole($user->getRole()));
+        $session = Session::createForUser($request, $user);
         $this->em->persist($session);
         $this->em->flush();
         return $response->withJson($session, 201);

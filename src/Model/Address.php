@@ -203,7 +203,8 @@ class Address implements \JsonSerializable {
      * @param array $data
      * @return Address
      */
-    public static function createFromRawData(array $data) {
+    public static function createFromRawData(array $data): Address
+    {
         $address = new self();
         return $address->importFromRawData($data);
     }
@@ -211,7 +212,7 @@ class Address implements \JsonSerializable {
     /**
      * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize() : array
     {
         return [
             'id' => $this->getId(),

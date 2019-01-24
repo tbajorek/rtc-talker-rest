@@ -1,5 +1,7 @@
 <?php
 
+use Doctrine\DBAL\Types\Type;
+
 use Slim\Container;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
@@ -9,7 +11,10 @@ use Doctrine\Common\Cache\FilesystemCache;
 
 $settings = require __DIR__ . '/src/settings.php';
 
-\Doctrine\DBAL\Types\Type::addType('uuid', 'Ramsey\Uuid\Doctrine\UuidType');
+if(!Type::hasType('uuid')){
+    Type::addType('uuid', 'Ramsey\Uuid\Doctrine\UuidType');
+}
+
 $container = new Container($settings);
 
 $container[EntityManager::class] = function (Container $container): EntityManager {
@@ -17,10 +22,10 @@ $container[EntityManager::class] = function (Container $container): EntityManage
         $container['settings']['doctrine']['metadata_dirs'],
         $container['settings']['doctrine']['dev_mode']
     );
-
+    $annotationReader = new AnnotationReader();
     $config->setMetadataDriverImpl(
         new AnnotationDriver(
-            new AnnotationReader,
+            $annotationReader,
             $container['settings']['doctrine']['metadata_dirs']
         )
     );
@@ -31,10 +36,17 @@ $container[EntityManager::class] = function (Container $container): EntityManage
         )
     );
 
+    $evm = new Doctrine\Common\EventManager();
+    $timestampableListener = new Gedmo\Timestampable\TimestampableListener();
+    $timestampableListener->setAnnotationReader($annotationReader);
+    $evm->addEventSubscriber($timestampableListener);
+
     return EntityManager::create(
         $container['settings']['doctrine']['connection'],
-        $config
+        $config,
+        $evm
     );
 };
 
 return $container;
+

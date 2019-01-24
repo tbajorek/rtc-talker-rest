@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use forxer\Gravatar\Gravatar;
 use Curl\Curl;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * This class represents an user of the system
@@ -121,21 +122,21 @@ class User implements \JsonSerializable {
     /**
      * @var float
      *
-     * @ORM\Column(type="decimal", nullable=false, precision=2, scale=1)
+     * @ORM\Column(type="decimal", nullable=false, precision=2, scale=1, options={"default" : 0.0})
      */
     private $rate;
 
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="integer", nullable=false, options={"default" : 0})
      */
     private $ratesNumber;
 
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=false)
+     * @ORM\Column(type="integer", nullable=false, options={"default" : 0})
      */
     private $talksNumber;
 
@@ -509,7 +510,7 @@ class User implements \JsonSerializable {
         $user->setName($inputData['name'])
              ->setSurname($inputData['surname'])
              ->setEmail($inputData['email'])
-             ->setPassword(User::encodePassword($inputData['password']))
+             ->setPassword(self::encodePassword($inputData['password']))
              ->setActivated(false)
              ->setRate(0)
              ->setRatesNumber(0)
@@ -521,7 +522,7 @@ class User implements \JsonSerializable {
     /**
      * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $data = [
             'id' => $this->getId(),
@@ -546,7 +547,7 @@ class User implements \JsonSerializable {
     /**
      * @return array
      */
-    public function jsonPublicSerialize()
+    public function jsonPublicSerialize(): array
     {
         $data = [
             'id' => $this->getId(),
