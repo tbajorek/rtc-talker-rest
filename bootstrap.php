@@ -37,9 +37,6 @@ $container[EntityManager::class] = function (Container $container): EntityManage
     );
 
     $evm = new Doctrine\Common\EventManager();
-    $timestampableListener = new Gedmo\Timestampable\TimestampableListener();
-    $timestampableListener->setAnnotationReader($annotationReader);
-    $evm->addEventSubscriber($timestampableListener);
 
     return EntityManager::create(
         $container['settings']['doctrine']['connection'],
