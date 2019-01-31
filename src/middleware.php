@@ -1,13 +1,11 @@
 <?php
 // Application middleware
 
-// e.g: $app->add(new \Slim\Csrf\Guard);
-
 use function RtcTalker\Utility\getSecret;
 
 $app->add(new Tuupola\Middleware\JwtAuthentication([
     "secret" => getSecret('../secret.key'),
-    "secure" => false,
+    "secure" => getenv('DEV_MODE') == 1,
     "path" => ['/user', '/company', '/users', '/departments', '/companies'],
     "ignore" => ["/user/account", "/user/session", "/options", "/rates"],
     "logger" => $app->getContainer()->get('logger'),
